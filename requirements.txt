@@ -1,0 +1,8 @@
+pandas>=2.2,<4
+numpy>=1.26,<3
+yfinance>=0.2.50
+openai>=1.0
+python-dotenv>=1.0
+flask>=3.0,<4
+gunicorn>=23,<24
+pytest>=8.0
