@@ -54,6 +54,10 @@
             <textarea id="question" name="question" rows="5">請綜合分析這檔股票的價格、技術面、基本面與近期新聞。</textarea>
             <p class="field-hint">例如：只看股價、請分析技術面，或比較近期新聞與基本面風險。</p>
 
+            <label for="openai-api-key">OpenAI API Key <span>本次使用，可留空</span></label>
+            <input id="openai-api-key" name="openai_api_key" type="password" placeholder="sk-…" autocomplete="off" autocapitalize="off" spellcheck="false">
+            <p class="field-hint">只隨本次 HTTPS 請求傳送，完成後會清除，不會寫入本專案資料庫。</p>
+
             <button class="primary-button" id="submit-button" type="submit">
               <span class="button-label">開始分析</span>
               <span class="button-loading" hidden>正在整理資料…</span>
@@ -63,7 +67,7 @@
 
           <div class="privacy-note">
             <span class="note-icon" aria-hidden="true">i</span>
-            <span>資料來自公開市場來源，可能延遲或缺漏；本工具不提供下單或買賣建議。</span>
+            <span>API Key 僅供本次分析使用；請只在你信任的服務網址輸入。資料可能延遲或缺漏，本工具不提供下單或買賣建議。</span>
           </div>
         </section>
 

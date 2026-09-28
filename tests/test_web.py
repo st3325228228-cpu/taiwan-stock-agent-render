@@ -29,3 +29,37 @@ def test_analyze_api_still_returns_report(monkeypatch, tmp_path: Path):
     assert body["bundle"]["symbol"] == "2330.TW"
     assert body["bundle"]["sections"]["price"]["status"] == "ok"
     assert "Important Notice" in body["report"]
+
+
+def test_analyze_api_passes_key_only_to_current_request(monkeypatch):
+    captured = {}
+
+    class FakeResult:
+        def to_dict(self):
+            return {
+                "report": "## Important Notice\nTest report",
+                "bundle": {"symbol": "2330.TW", "sections": {}},
+                "analysis_id": 7,
+            }
+
+    class FakeAgent:
+        def analyze(self, request):
+            captured["symbol"] = request.symbol
+            return FakeResult()
+
+    def fake_build_agent(api_key=""):
+        captured["api_key"] = api_key
+        return FakeAgent()
+
+    monkeypatch.setattr(web, "build_agent", fake_build_agent)
+    response = web.app.test_client().post(
+        "/analyze",
+        json={
+            "symbol": "2330",
+            "question": "只看股價",
+            "openai_api_key": "request-only-key",
+        },
+    )
+
+    assert response.status_code == 200
+    assert captured == {"api_key": "request-only-key", "symbol": "2330"}

@@ -16,13 +16,20 @@ from app.providers import MockDataProvider, YFinanceProvider
 app = Flask(__name__)
 
 
-def build_agent() -> StockAgent:
+def build_agent(api_key: str = "") -> StockAgent:
     settings = Settings.from_env()
     provider = MockDataProvider() if settings.provider == "mock" else YFinanceProvider()
+    request_key = api_key.strip()
     return StockAgent(
         provider=provider,
         store=AnalysisStore(settings.database_path),
-        llm=LLMAnalyzer(model=settings.llm_model, enabled=settings.use_llm),
+        # A request key enables LLM use even when Render keeps USE_LLM=false.
+        # Passing an explicit empty string prevents accidental env-key fallback.
+        llm=LLMAnalyzer(
+            model=settings.llm_model,
+            enabled=settings.use_llm or bool(request_key),
+            api_key=request_key,
+        ),
         news_limit=settings.news_limit,
     )
 
@@ -53,8 +60,14 @@ def analyze():
     if not question:
         return jsonify({"error": "question must not be empty"}), 400
 
+    request_key = payload.get("openai_api_key", "")
+    if request_key is None:
+        request_key = ""
+    if not isinstance(request_key, str):
+        return jsonify({"error": "openai_api_key must be a string"}), 400
+
     try:
-        result = build_agent().analyze(
+        result = build_agent(api_key=request_key).analyze(
             AnalysisRequest(symbol=symbol, question=question)
         )
         return jsonify(result.to_dict())

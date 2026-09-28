@@ -11,20 +11,39 @@ from .report import fallback_report
 class LLMAnalyzer:
     """Turn structured evidence into a cautious Traditional Chinese report."""
 
-    def __init__(self, model: str = "gpt-5-mini", enabled: bool = True) -> None:
+    def __init__(
+        self,
+        model: str = "gpt-5-mini",
+        enabled: bool = True,
+        api_key: str | None = None,
+        api_base: str | None = None,
+    ) -> None:
         self.model = model
         self.enabled = enabled
+        # None preserves the CLI's environment-variable behavior. An explicit
+        # empty string intentionally disables environment fallback for web use.
+        self.api_key = api_key
+        self.api_base = api_base
         self._client = None
 
     def _get_client(self):
         if self._client is not None:
             return self._client
-        if not self.enabled or not os.getenv("OPENAI_API_KEY"):
+        if not self.enabled:
+            return None
+        api_key = self.api_key if self.api_key is not None else os.getenv("OPENAI_API_KEY")
+        if not api_key:
             return None
         try:
             from openai import OpenAI
 
-            self._client = OpenAI()
+            client_kwargs = {"api_key": api_key}
+            api_base = self.api_base
+            if api_base is None:
+                api_base = os.getenv("OPENAI_API_BASE") or os.getenv("OPENAI_BASE_URL")
+            if api_base:
+                client_kwargs["base_url"] = api_base
+            self._client = OpenAI(**client_kwargs)
             return self._client
         except Exception:
             return None

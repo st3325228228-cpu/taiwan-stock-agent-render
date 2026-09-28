@@ -27,7 +27,7 @@ Markdown 研究報告
 - 技術指標採透明公式：SMA(20/60/120)、EMA(12/26)、Wilder RSI(14)、MACD(12,26,9)、布林通道(20,2)。
 - 每個工具回傳 `status / data / source / retrieved_at / data_as_of`，資料不足不補 0。
 - SQLite 保存分析歷史與行情快照，方便後續加入比較或回顧功能。
-- LLM 可選：有 `OPENAI_API_KEY` 時使用 OpenAI-compatible Chat Completions；沒有金鑰時自動使用本地模板，不會讓整個流程失效。
+- LLM 可選：CLI 可使用 `OPENAI_API_KEY` 環境變數；網頁介面則可在每次分析時輸入金鑰。沒有金鑰時自動使用本地模板，不會讓整個流程失效。
 - 報告會列出資料缺口、來源、風險與 `Important Notice`。
 - 僅做研究與分析；不連接券商、不讀取帳戶、不下單、不改單、不撤單。
 
@@ -41,7 +41,7 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-在本環境中 `OPENAI_API_KEY` 與 `OPENAI_API_BASE` 可由執行環境注入；在其他電腦請自行設定，不要把金鑰寫入程式碼或 Git。
+CLI 可由執行環境注入 `OPENAI_API_KEY` 與 `OPENAI_API_BASE`；Render 網頁介面不必保存 `OPENAI_API_KEY`，使用者可在每次分析時輸入。任何情況都不要把真正金鑰寫入程式碼或 Git。
 
 ## 執行
 
@@ -84,10 +84,10 @@ STOCK_DATA_PROVIDER=mock USE_LLM=false gunicorn --bind 127.0.0.1:10000 web:app
 
 | 變數 | 預設 | 說明 |
 |---|---:|---|
-| `OPENAI_API_KEY` | 空 | LLM API 金鑰；留空會使用本地模板 |
+| `OPENAI_API_KEY` | 空 | CLI 的 LLM API 金鑰；網頁介面改為每次輸入，Render 可留空 |
 | `OPENAI_API_BASE` | 空 | OpenAI-compatible API Base URL |
 | `LLM_MODEL` | `gpt-5-mini` | 綜合分析模型；可改成環境可用的模型 |
-| `USE_LLM` | `true` | `false` 時完全停用 LLM |
+| `USE_LLM` | `true` | 沒有單次輸入金鑰時是否啟用環境 LLM；網頁輸入金鑰會啟用該次分析 |
 | `STOCK_AGENT_DB` | `data/agent.db` | SQLite 路徑 |
 | `NEWS_LIMIT` | `8` | 最多保留的新聞數 |
 

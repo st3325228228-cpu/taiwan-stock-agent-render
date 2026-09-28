@@ -1,6 +1,7 @@
 const form = document.getElementById("analysis-form");
 const symbolInput = document.getElementById("symbol");
 const questionInput = document.getElementById("question");
+const apiKeyInput = document.getElementById("openai-api-key");
 const submitButton = document.getElementById("submit-button");
 const buttonLabel = document.querySelector(".button-label");
 const buttonLoading = document.querySelector(".button-loading");
@@ -162,6 +163,7 @@ form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const symbol = symbolInput.value.trim();
   const question = questionInput.value.trim();
+  const openaiApiKey = apiKeyInput.value.trim();
   if (!symbol || !question) return;
 
   setLoading(true);
@@ -175,7 +177,11 @@ form.addEventListener("submit", async (event) => {
     const response = await fetch("/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ symbol, question }),
+      body: JSON.stringify({
+        symbol,
+        question,
+        openai_api_key: openaiApiKey,
+      }),
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "分析失敗，請稍後再試。 ");
@@ -190,6 +196,7 @@ form.addEventListener("submit", async (event) => {
     showError(error.message || "無法連線到分析服務，請稍後再試。");
   } finally {
     setLoading(false);
+    apiKeyInput.value = "";
   }
 });
 

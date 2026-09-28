@@ -197,18 +197,22 @@ git push -u origin main
 
 這個專案即使沒有金鑰，也會使用內建的本地 Markdown 報告模板；因此可以先確認免費部署和行情資料流程都正常。
 
-### 如果你確定要使用 LLM
+### 網頁介面使用 LLM：每次分析輸入
 
-再另外加入：
+這個版本不需要把 `OPENAI_API_KEY` 放進 Render。保留 `USE_LLM=false` 即可；當你在網頁的 **OpenAI API Key（本次使用）** 欄位輸入金鑰並送出時，該次請求會啟用 LLM。
+
+- 金鑰只隨該次 HTTPS 請求傳送給你的 Render 服務。
+- 不會放進 `AnalysisRequest`、研究報告或 SQLite。
+- 前端在請求成功或失敗後會清空金鑰輸入欄。
+- 不要在不信任的網址輸入金鑰；這個流程假設你使用的是自己的 Render 服務。
+- Render 免費不代表 LLM API 免費，請在 OpenAI 後台設定用量上限。
+
+只有使用 OpenAI-compatible 供應商時，才需要在 Render 設定：
 
 | Key | Value |
 |---|---|
-| `USE_LLM` | `true` |
-| `OPENAI_API_KEY` | 在 Render 的 Secret 欄位貼入金鑰 |
-| `OPENAI_API_BASE` | 如果使用相容 API 才填，否則留空 |
-| `LLM_MODEL` | 你的 API 供應商實際提供的模型名稱 |
-
-> Render 免費不代表 LLM API 免費。只要 `USE_LLM=true` 且金鑰有效，分析請求可能產生供應商費用；請自行設定供應商的用量上限。
+| `OPENAI_API_BASE` | 供應商的 Base URL |
+| `LLM_MODEL` | 供應商實際提供的模型名稱 |
 
 按 **Create Web Service**，等待 Build 與 Deploy 完成。
 
@@ -247,6 +251,16 @@ curl -X POST https://taiwan-stock-agent-xxxx.onrender.com/analyze \\
 - `report`：繁體中文 Markdown 報告
 - `bundle`：結構化資料、來源與資料缺口
 - `analysis_id`：SQLite 中的暫存分析 ID
+
+若使用原始 API 而不是網頁，可以在**每次請求**加入 `openai_api_key`；但不要把真正金鑰直接寫在會留下 shell history 的指令中，建議使用網頁輸入框：
+
+```json
+{
+  "symbol": "2330",
+  "question": "請分析價格、技術面與近期新聞",
+  "openai_api_key": "本次輸入的金鑰"
+}
+```
 
 直接在瀏覽器開啟根網址會看到網頁前端，可以輸入代號後開始分析。若要從其他程式呼叫，原本的 `POST /analyze` JSON API 仍然可用；`/healthz` 則可用來做 Render 健康檢查。
 
