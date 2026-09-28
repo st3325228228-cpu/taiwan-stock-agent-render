@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="唯讀台股研究助手：股價、技術面、基本面與新聞分析">
+    <title>台股 AI 研究助手</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-topline">
+          <a class="brand" href="/" aria-label="台股 AI 研究助手首頁">
+            <span class="brand-mark">台</span>
+            <span>
+              <span class="eyebrow">TAIWAN STOCK RESEARCH</span>
+              <span class="brand-name">台股 AI 研究助手</span>
+            </span>
+          </a>
+          <span class="mode-pill"><span class="status-dot"></span>唯讀研究模式</span>
+        </div>
+        <div class="hero-copy">
+          <p class="eyebrow">EVIDENCE FIRST · TRADITIONAL CHINESE</p>
+          <h1>把市場資料，整理成<br><em>看得懂的研究報告。</em></h1>
+          <p>輸入股票代號與你的問題，取得包含價格、技術面、基本面與新聞線索的結構化分析。</p>
+        </div>
+      </header>
+
+      <main class="content-grid">
+        <section class="panel query-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-kicker">START A REVIEW</p>
+              <h2>你想研究哪一檔？</h2>
+            </div>
+            <span class="step-badge">01</span>
+          </div>
+
+          <form id="analysis-form">
+            <label for="symbol">股票代號 <span>必填</span></label>
+            <div class="input-with-suffix">
+              <input id="symbol" name="symbol" type="text" placeholder="例如 2330" autocomplete="off" maxlength="20" required>
+              <span>TW / TWO</span>
+            </div>
+            <div class="quick-symbols" aria-label="常用股票代號">
+              <button type="button" class="symbol-chip" data-symbol="2330">2330 台積電</button>
+              <button type="button" class="symbol-chip" data-symbol="2317">2317 鴻海</button>
+              <button type="button" class="symbol-chip" data-symbol="6488.TWO">6488 上櫃</button>
+            </div>
+
+            <label for="question">研究問題 <span>可自訂</span></label>
+            <textarea id="question" name="question" rows="5">請綜合分析這檔股票的價格、技術面、基本面與近期新聞。</textarea>
+            <p class="field-hint">例如：只看股價、請分析技術面，或比較近期新聞與基本面風險。</p>
+
+            <button class="primary-button" id="submit-button" type="submit">
+              <span class="button-label">開始分析</span>
+              <span class="button-loading" hidden>正在整理資料…</span>
+              <span class="button-arrow" aria-hidden="true">→</span>
+            </button>
+          </form>
+
+          <div class="privacy-note">
+            <span class="note-icon" aria-hidden="true">i</span>
+            <span>資料來自公開市場來源，可能延遲或缺漏；本工具不提供下單或買賣建議。</span>
+          </div>
+        </section>
+
+        <section class="panel result-panel" id="result-panel" aria-live="polite">
+          <div class="panel-heading result-heading">
+            <div>
+              <p class="section-kicker">RESEARCH REPORT</p>
+              <h2 id="result-title">分析報告會出現在這裡</h2>
+            </div>
+            <span class="result-badge" id="result-status">等待輸入</span>
+          </div>
+
+          <div class="empty-state" id="empty-state">
+            <div class="empty-illustration" aria-hidden="true">
+              <svg viewBox="0 0 120 100" role="img">
+                <path d="M15 82h90" class="chart-line"></path>
+                <path d="M22 72 42 52l16 12 25-32 15 15" class="chart-line chart-accent"></path>
+                <circle cx="83" cy="32" r="5" class="chart-dot"></circle>
+              </svg>
+            </div>
+            <h3>準備好開始了嗎？</h3>
+            <p>填入左側的股票代號與問題，這裡會顯示整理好的繁體中文報告。</p>
+          </div>
+
+          <div class="error-box" id="error-box" role="alert" hidden></div>
+
+          <div id="result-content" hidden>
+            <div class="result-meta" id="result-meta"></div>
+            <article class="report-card">
+              <div class="report-card-topline">
+                <span>ANALYSIS OUTPUT</span>
+                <span id="report-id"></span>
+              </div>
+              <div class="report-content" id="report-content"></div>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <span>台股 AI 研究助手</span>
+        <span>Powered by public market data · <a href="/healthz">API status</a></span>
+      </footer>
+    </div>
+  </body>
+</html>

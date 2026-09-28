@@ -13,7 +13,8 @@ python -m app 2330 --question "請分析台積電的技術面、基本面與近�
 我已準備一份可部署版本：
 
 - 保留原本的 `python -m app ...` CLI。
-- 新增 `web.py`，提供 `/healthz` 與 `POST /analyze` API。
+- 新增 `web.py`，提供網頁首頁、`/healthz` 與 `POST /analyze` API。
+- 新增 `templates/index.html`、`static/styles.css` 與 `static/app.js`，提供輸入框、載入狀態、錯誤提示與報告排版。
 - 加入 Flask 與 Gunicorn。
 - 預設 `USE_LLM=false`，避免你不小心產生 LLM API 費用。
 
@@ -106,6 +107,14 @@ curl -X POST http://127.0.0.1:10000/analyze \\
   -H "Content-Type: application/json" \\
   -d '{"symbol":"2330","question":"只看股價"}'
 ```
+
+也可以直接用瀏覽器開啟：
+
+```text
+http://127.0.0.1:10000/
+```
+
+你會看到股票代號輸入框與研究問題輸入框。按下「開始分析」後，網頁會在背景呼叫同一個服務的 `POST /analyze`，並將回傳的 Markdown 報告排版顯示。
 
 若以上成功，才進入 Render 部署。
 
@@ -239,7 +248,7 @@ curl -X POST https://taiwan-stock-agent-xxxx.onrender.com/analyze \\
 - `bundle`：結構化資料、來源與資料缺口
 - `analysis_id`：SQLite 中的暫存分析 ID
 
-如果只在瀏覽器網址列開啟根網址，會看到服務狀態 JSON；分析功能目前是 API，需用 `curl`、Postman 或前端頁面呼叫 `POST /analyze`。
+直接在瀏覽器開啟根網址會看到網頁前端，可以輸入代號後開始分析。若要從其他程式呼叫，原本的 `POST /analyze` JSON API 仍然可用；`/healthz` 則可用來做 Render 健康檢查。
 
 ---
 
@@ -322,4 +331,3 @@ STOCK_DATA_PROVIDER=mock USE_LLM=false gunicorn --bind 127.0.0.1:10000 web:app
 - [Render：免費部署與限制](https://render.com/docs/free)
 - [Render：Web Services](https://render.com/docs/web-services)
 - [Render：首次部署](https://render.com/docs/your-first-deploy)
-

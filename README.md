@@ -70,6 +70,16 @@ python -m app 2330 --mock --no-llm
 python -m app 2330 --mock --no-llm --json > result.json
 ```
 
+### 使用瀏覽器網頁介面
+
+Render 部署版本提供 Flask 網頁首頁。啟動 Web Service 後，直接開啟服務網址即可看到股票代號輸入框、研究問題輸入框與排版好的 Markdown 報告：
+
+```bash
+STOCK_DATA_PROVIDER=mock USE_LLM=false gunicorn --bind 127.0.0.1:10000 web:app
+```
+
+接著開啟 <http://127.0.0.1:10000/>。網頁會以 `fetch` 呼叫同一個服務的 `POST /analyze`，原本的 JSON API 仍然保留。
+
 ## 環境變數
 
 | 變數 | 預設 | 說明 |

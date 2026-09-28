@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, render_template, request
 
 from app.agent import StockAgent
 from app.config import Settings
@@ -29,13 +29,7 @@ def build_agent() -> StockAgent:
 
 @app.get("/")
 def index():
-    return jsonify(
-        {
-            "service": "taiwan-stock-agent",
-            "status": "ok",
-            "message": "POST /analyze with JSON: {\"symbol\": \"2330\", \"question\": \"只看股價\"}",
-        }
-    )
+    return render_template("index.html")
 
 
 @app.get("/healthz")
