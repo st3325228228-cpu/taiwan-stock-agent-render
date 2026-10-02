@@ -11,6 +11,8 @@ def test_index_serves_research_ui():
     assert response.status_code == 200
     assert "台股 AI 研究助手" in response.get_data(as_text=True)
     assert "analysis-form" in response.get_data(as_text=True)
+    assert "theme-toggle" in response.get_data(as_text=True)
+    assert "taiwan-stock-theme" in response.get_data(as_text=True)
 
 
 def test_analyze_api_still_returns_report(monkeypatch, tmp_path: Path):

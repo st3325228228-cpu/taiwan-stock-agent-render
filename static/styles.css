@@ -16,6 +16,16 @@
   --radius: 22px;
 }
 
+:root[data-theme="dark"] {
+  --ink: #eef2ff;
+  --muted: #aab6d4;
+  --muted-light: #8190b5;
+  --line: #2a3555;
+  --paper: #141c34;
+  --canvas: #0b1022;
+  --shadow: 0 24px 64px rgba(0, 0, 0, .28);
+}
+
 * { box-sizing: border-box; }
 
 html { scroll-behavior: smooth; }
@@ -77,6 +87,10 @@ button { cursor: pointer; }
 .header-actions { display: flex; align-items: center; gap: 9px; }
 .header-status { display: inline-flex; align-items: center; padding: 8px 11px; border: 1px solid rgba(255,255,255,.13); border-radius: 999px; color: #c8d2f1; background: rgba(255,255,255,.045); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-decoration: none; transition: border-color .2s, background .2s, color .2s; }
 .header-status:hover { color: #fff; border-color: rgba(164,180,255,.45); background: rgba(255,255,255,.10); }
+.theme-toggle { display: inline-flex; align-items: center; gap: 7px; padding: 8px 11px; border: 1px solid rgba(255,255,255,.15); border-radius: 999px; color: #d9e1ff; background: rgba(255,255,255,.06); font-size: 10px; font-weight: 800; transition: border-color .2s, background .2s, color .2s, transform .2s; }
+.theme-toggle:hover { color: #fff; border-color: rgba(164,180,255,.45); background: rgba(255,255,255,.12); transform: translateY(-1px); }
+.theme-icon { position: relative; display: inline-block; width: 13px; height: 13px; border: 1.5px solid currentColor; border-radius: 50%; overflow: hidden; }
+.theme-icon::after { content: ""; position: absolute; inset: -2px -2px -2px 5px; border-radius: 50%; background: currentColor; }
 .brand { display: inline-flex; align-items: center; gap: 13px; color: inherit; text-decoration: none; }
 .brand-mark {
   width: 44px; height: 44px; display: grid; place-items: center; border-radius: 14px;
@@ -229,6 +243,61 @@ textarea { min-height: 126px; padding: 13px 15px; resize: vertical; font-size: 1
 .site-footer { display: flex; justify-content: space-between; gap: 15px; max-width: 1220px; margin: 0 auto; padding: 2px 24px 28px; color: #8b96ab; font-size: 11px; }
 .site-footer a { color: var(--blue-dark); text-decoration: none; }
 .site-footer a:hover { text-decoration: underline; }
+
+html[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at 8% 54%, rgba(74, 96, 190, .16), transparent 23%),
+    linear-gradient(180deg, #0b1022 0%, #10172b 100%);
+}
+
+html[data-theme="dark"] .panel { border-color: #293452; }
+html[data-theme="dark"] .result-panel { background: linear-gradient(180deg, #141c34 0%, #11192e 100%); }
+html[data-theme="dark"] .panel-subtitle,
+html[data-theme="dark"] .field-hint,
+html[data-theme="dark"] .empty-state,
+html[data-theme="dark"] .privacy-note { color: #aab6d4; }
+html[data-theme="dark"] label span,
+html[data-theme="dark"] .question-presets > span { color: #8190b5; }
+html[data-theme="dark"] .step-badge { color: #b4c2ff; border-color: #324171; background: #1c2850; }
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea { color: #eef2ff; border-color: #2b385c; background: #0f172c; }
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] textarea:focus { background: #141f3a; border-color: #7189ef; }
+html[data-theme="dark"] .input-with-suffix > span { color: #8998bd; }
+html[data-theme="dark"] .symbol-chip,
+html[data-theme="dark"] .prompt-chip { color: #b7c1dd; border-color: #2c3859; background: #121b32; }
+html[data-theme="dark"] .symbol-chip:hover,
+html[data-theme="dark"] .prompt-chip:hover { color: #d9e1ff; border-color: #667bd0; background: #1c2850; }
+html[data-theme="dark"] .secret-toggle { color: #c6d0ff; background: #202e5a; }
+html[data-theme="dark"] .secret-toggle:hover { background: #2c3d73; }
+html[data-theme="dark"] .privacy-note { border-top-color: #293452; }
+html[data-theme="dark"] .note-icon { border-color: #65739b; }
+html[data-theme="dark"] .result-badge { color: #b5c0db; background: #202b48; }
+html[data-theme="dark"] .result-badge::before { background: #8294c5; }
+html[data-theme="dark"] .empty-feature-grid span { color: #aab6d4; border-color: #2a3555; background: #10182d; }
+html[data-theme="dark"] .empty-feature-grid span:hover { border-color: #647bd1; background: #172344; }
+html[data-theme="dark"] .error-box { border-color: #6c3544; color: #f3aab6; background: #291722; }
+html[data-theme="dark"] .meta-chip { color: #b6c1dd; border-color: #2c385a; background: #111a31; }
+html[data-theme="dark"] .meta-chip strong { color: #eef2ff; }
+html[data-theme="dark"] .meta-ok { color: #94e3c3; border-color: #245b4b; background: #122d2a; }
+html[data-theme="dark"] .meta-skipped { color: #9ca9c8; background: #1a233b; }
+html[data-theme="dark"] .meta-partial { color: #e5bd78; border-color: #6f542b; background: #302616; }
+html[data-theme="dark"] .meta-failed { color: #f0a4b0; border-color: #6c3544; background: #291722; }
+html[data-theme="dark"] .report-card { border-color: #2b3859; background: #121a30; }
+html[data-theme="dark"] .report-card-topline { color: #94a3c6; border-bottom-color: #2b3859; background: #0e1629; }
+html[data-theme="dark"] .report-content { color: #c7d1e8; }
+html[data-theme="dark"] .report-content blockquote { color: #aab6d4; background: #1b1a38; }
+html[data-theme="dark"] .report-content code { color: #d0c3ff; background: #29204c; }
+html[data-theme="dark"] .report-content hr { border-top-color: #2b3859; }
+html[data-theme="dark"] .report-section { border-color: #2b3859; background: linear-gradient(145deg, #151e37, #11192e); box-shadow: 0 8px 22px rgba(0,0,0,.13); }
+html[data-theme="dark"] .report-section-heading { color: #eef2ff; }
+html[data-theme="dark"] .report-section-body { border-top-color: #2b3859; }
+html[data-theme="dark"] .report-section-number { color: #bdc9ff; background: #202d59; }
+html[data-theme="dark"] .section-fundamentals .report-section-number { color: #96e1c5; background: #153c37; }
+html[data-theme="dark"] .section-news .report-section-number { color: #f0c887; background: #43351d; }
+html[data-theme="dark"] .section-notice { border-color: #40346c; background: linear-gradient(145deg, #191c3d, #14182f); }
+html[data-theme="dark"] .missing-data { color: #e7be78; border-color: #6f542b; background: #302616; }
+html[data-theme="dark"] .site-footer { color: #8190b5; }
 
 @keyframes card-float {
   0%, 100% { transform: translateY(0) rotate(.4deg); }

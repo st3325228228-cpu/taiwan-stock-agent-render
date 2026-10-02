@@ -80,6 +80,14 @@ STOCK_DATA_PROVIDER=mock USE_LLM=false gunicorn --bind 127.0.0.1:10000 web:app
 
 接著開啟 <http://127.0.0.1:10000/>。網頁會以 `fetch` 呼叫同一個服務的 `POST /analyze`，原本的 JSON API 仍然保留。
 
+### Dark Mode
+
+首頁右上角提供「深色」切換按鈕。主題會：
+
+- 優先跟隨作業系統的 `prefers-color-scheme`。
+- 記住使用者在瀏覽器的選擇，下次開啟仍會保留。
+- 同步套用到輸入框、報告卡片、Tool 折疊區塊、狀態徽章與背景。
+
 ## 環境變數
 
 | 變數 | 預設 | 說明 |

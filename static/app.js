@@ -3,6 +3,8 @@ const symbolInput = document.getElementById("symbol");
 const questionInput = document.getElementById("question");
 const apiKeyInput = document.getElementById("openai-api-key");
 const apiKeyToggle = document.getElementById("toggle-api-key");
+const themeToggle = document.getElementById("theme-toggle");
+const themeLabel = themeToggle.querySelector(".theme-label");
 const submitButton = document.getElementById("submit-button");
 const buttonLabel = document.querySelector(".button-label");
 const buttonLoading = document.querySelector(".button-loading");
@@ -14,6 +16,17 @@ const resultStatus = document.getElementById("result-status");
 const resultMeta = document.getElementById("result-meta");
 const reportId = document.getElementById("report-id");
 const reportContent = document.getElementById("report-content");
+const themeStorageKey = "taiwan-stock-theme";
+
+function applyTheme(theme) {
+  const isDark = theme === "dark";
+  document.documentElement.dataset.theme = isDark ? "dark" : "light";
+  themeToggle.setAttribute("aria-pressed", String(isDark));
+  themeToggle.setAttribute("aria-label", isDark ? "切換淺色模式" : "切換深色模式");
+  themeLabel.textContent = isDark ? "淺色" : "深色";
+}
+
+applyTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
 
 function escapeHtml(value) {
   return String(value)
@@ -268,4 +281,14 @@ apiKeyToggle.addEventListener("click", () => {
   apiKeyToggle.textContent = shouldShow ? "隱藏" : "顯示";
   apiKeyToggle.setAttribute("aria-label", shouldShow ? "隱藏 API Key" : "顯示 API Key");
   apiKeyToggle.setAttribute("aria-pressed", String(shouldShow));
+});
+
+themeToggle.addEventListener("click", () => {
+  const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  applyTheme(nextTheme);
+  try {
+    localStorage.setItem(themeStorageKey, nextTheme);
+  } catch (_) {
+    // The theme still works for this session when storage is unavailable.
+  }
 });

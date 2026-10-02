@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="唯讀台股研究助手：股價、技術面、基本面與新聞分析">
     <title>台股 AI 研究助手</title>
+    <script>
+      (() => {
+        try {
+          const saved = localStorage.getItem("taiwan-stock-theme");
+          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          if (saved === "dark" || (!saved && prefersDark)) {
+            document.documentElement.dataset.theme = "dark";
+          }
+        } catch (_) {
+          // Private browsing or disabled storage should not block the page.
+        }
+      })();
+    </script>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script src="{{ url_for('static', filename='app.js') }}" defer></script>
   </head>
@@ -21,6 +34,10 @@
           </a>
           <div class="header-actions">
             <a class="header-status" href="/healthz"><span class="status-dot"></span>API STATUS</a>
+            <button class="theme-toggle" id="theme-toggle" type="button" aria-label="切換深色模式" aria-pressed="false">
+              <span class="theme-icon" aria-hidden="true"></span>
+              <span class="theme-label">深色</span>
+            </button>
             <span class="mode-pill">唯讀研究模式</span>
           </div>
         </div>
