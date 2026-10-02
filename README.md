@@ -2,22 +2,28 @@
 
 這是一個可在本機執行的**唯讀台股研究 Agent**，把使用者問題先交給可檢查的工具路由，再把結構化資料交給 LLM 綜合成繁體中文 Markdown 報告。
 
-## 架構
+## 系統架構
 
-```text
-使用者問題
-    ↓
-ToolPlanner（判斷需要哪些資料）
-    ↓
-├─ 股價 Tool          → Yahoo Finance / yfinance
-├─ 技術分析 Tool      → 本地計算 SMA、EMA、RSI、MACD、布林通道
-├─ 基本面 Tool        → 公司摘要與估值欄位
-├─ 新聞搜尋 Tool      → 近期新聞清單
-└─ 資料庫 Tool        → SQLite 保存快照與歷史分析
-    ↓
-LLMAnalyzer（可關閉；預設 gpt-5-mini）
-    ↓
-Markdown 研究報告
+```mermaid
+flowchart TD
+    B[瀏覽器首頁<br/>GET /] --> W[Flask Web Service<br/>web.py]
+    B --> A[POST /analyze<br/>JSON API]
+    A --> P[ToolPlanner<br/>判斷需要哪些資料]
+    P --> PR[股價 Tool<br/>Yahoo Finance / yfinance]
+    P --> TA[技術分析 Tool<br/>SMA EMA RSI MACD]
+    P --> FU[基本面 Tool<br/>公司摘要與估值欄位]
+    P --> NE[新聞搜尋 Tool<br/>近期新聞清單]
+    P --> DB[資料庫 Tool<br/>SQLite 快照與歷史分析]
+    PR --> E[AnalysisBundle<br/>結構化證據]
+    TA --> E
+    FU --> E
+    NE --> E
+    DB --> E
+    E --> L[LLMAnalyzer<br/>OpenAI-compatible API<br/>或本地模板]
+    L --> R[Markdown 研究報告]
+    R --> B
+    H[GET /healthz] --> W
+    C[CLI: python -m app] --> P
 ```
 
 ## 已實作功能
@@ -72,13 +78,44 @@ python -m app 2330 --mock --no-llm --json > result.json
 
 ### 使用瀏覽器網頁介面
 
-Render 部署版本提供 Flask 網頁首頁。啟動 Web Service 後，直接開啟服務網址即可看到股票代號輸入框、研究問題輸入框與排版好的 Markdown 報告：
+Render 部署版本提供 Flask 網頁首頁。啟動 Web Service 後，直接開啟服務網址即可看到股票代號輸入框、研究問題輸入框與排版好的 Markdown 報告。
 
 ```bash
-STOCK_DATA_PROVIDER=mock USE_LLM=false gunicorn --bind 127.0.0.1:10000 web:app
+STOCK_DATA_PROVIDER=mock USE_LLM=false gunicorn --bind 0.0.0.0:10000 web:app
 ```
 
-接著開啟 <http://127.0.0.1:10000/>。網頁會以 `fetch` 呼叫同一個服務的 `POST /analyze`，原本的 JSON API 仍然保留。
+在**同一台本機**開啟 <http://127.0.0.1:10000/>。如果服務跑在 Render、Manus Sandbox 或其他遠端機器，`127.0.0.1` 只會指向你目前使用瀏覽器的那台機器，請改開遠端服務提供的公開網址。
+
+Render 的 **Start Command** 必須使用平台提供的 `$PORT`：
+
+```bash
+gunicorn --bind 0.0.0.0:$PORT web:app
+```
+
+### Flask API 使用方式
+
+健康檢查：
+
+```bash
+curl http://127.0.0.1:10000/healthz
+```
+
+分析 API：
+
+```bash
+curl -X POST http://127.0.0.1:10000/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"symbol":"2330","question":"請分析技術面、基本面與近期新聞","openai_api_key":""}'
+```
+
+`POST /analyze` 會回傳 `report`、`analysis_id`、`bundle`、各工具狀態與資料缺口。瀏覽器首頁會以 `fetch('/analyze')` 呼叫相同 API，再把 Markdown 報告排版顯示。`openai_api_key` 只供該次請求使用，請只在你信任的 HTTPS 服務網址輸入。
+
+如果本機頁面無法開啟，先檢查服務是否真的監聽 10000 port：
+
+```bash
+ss -lntp | grep 10000
+curl -v http://127.0.0.1:10000/healthz
+```
 
 ### Dark Mode
 

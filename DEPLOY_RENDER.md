@@ -85,7 +85,7 @@ python -m app 2330 --mock --no-llm
 ### 4. 本機啟動 HTTP API
 
 ```bash
-STOCK_DATA_PROVIDER=mock USE_LLM=false gunicorn --bind 127.0.0.1:10000 web:app
+STOCK_DATA_PROVIDER=mock USE_LLM=false gunicorn --bind 0.0.0.0:10000 web:app
 ```
 
 另一個終端測試：
@@ -108,13 +108,24 @@ curl -X POST http://127.0.0.1:10000/analyze \\
   -d '{"symbol":"2330","question":"只看股價"}'
 ```
 
-也可以直接用瀏覽器開啟：
+如果瀏覽器與 Gunicorn 在**同一台機器**，可以直接開啟：
 
 ```text
 http://127.0.0.1:10000/
 ```
 
 你會看到股票代號輸入框與研究問題輸入框。按下「開始分析」後，網頁會在背景呼叫同一個服務的 `POST /analyze`，並將回傳的 Markdown 報告排版顯示。
+
+如果 Gunicorn 跑在 Manus Sandbox、遠端 VM 或其他遠端環境，瀏覽器中的 `127.0.0.1` 會指向瀏覽器自己的電腦，不是遠端服務；此時要開啟該環境提供的公開 URL。Render 部署則直接開啟 Render 顯示的 `https://<service-name>.onrender.com/`。
+
+若本機仍然無法開啟，先檢查：
+
+```bash
+ss -lntp | grep 10000
+curl -v http://127.0.0.1:10000/healthz
+```
+
+如果 `curl` 也失敗，代表服務沒有成功啟動或沒有監聽 10000 port，請查看 Gunicorn 的錯誤輸出。
 
 若以上成功，才進入 Render 部署。
 
@@ -331,7 +342,7 @@ gunicorn>=23,<24
 若要分辨是不是行情網路問題，可在本機先用：
 
 ```bash
-STOCK_DATA_PROVIDER=mock USE_LLM=false gunicorn --bind 127.0.0.1:10000 web:app
+STOCK_DATA_PROVIDER=mock USE_LLM=false gunicorn --bind 0.0.0.0:10000 web:app
 ```
 
 ### 金鑰或費用疑慮
