@@ -18,7 +18,7 @@ python -m app 2330 --question "請分析台積電的技術面、基本面與近�
 - 加入 Flask 與 Gunicorn。
 - 預設 `USE_LLM=false`，避免你不小心產生 LLM API 費用。
 
-> Render 的免費主機適合練習、展示與個人專案，不適合正式生產服務。這個專案只做唯讀研究，不會連接券商或下單。
+> Render 的免費主機適合練習、展示與個人專案，不適合正式生產服務。這個專案只做唯讀研究，不會連接券商或下單。固定網址與 24/7 不休眠是兩件事：Free plan 有固定網址但會休眠；全天候服務需要在 Render 自行選擇付費 instance。
 
 ---
 
@@ -33,6 +33,7 @@ render-deploy/
 ├── web.py
 ├── requirements.txt
 ├── pyproject.toml
+├── render.yaml
 ├── .env.example
 ├── .gitignore
 └── README.md
@@ -170,9 +171,15 @@ git push -u origin main
 
 ---
 
-## 四、在 Render 建立免費 Web Service
+## 四、在 Render 建立 Web Service
 
 官方入口：[Render Dashboard](https://dashboard.render.com/)
+
+### 方案 A：使用 Blueprint（推薦）
+
+Repository 根目錄已包含 `render.yaml`。在 Render Dashboard 選擇 **New → Blueprint**，選擇 `taiwan-stock-agent-render` Repository 與 `main` 分支，Render 會讀取這份設定建立服務。
+
+### 方案 B：手動建立 Web Service
 
 1. 登入 Render，連接 GitHub。
 2. 點 **New → Web Service**。
@@ -190,6 +197,8 @@ git push -u origin main
 | **Health Check Path** | `/healthz`（如果介面提供此欄位） |
 
 `0.0.0.0` 和 `$PORT` 很重要。Render 官方要求 Web Service 在 `0.0.0.0` 監聽，並建議使用平台提供的 `PORT` 環境變數。
+
+Free plan 會讓閒置服務休眠，但網址仍然保留；如果要求 24/7 不休眠，請在 Render Dashboard 自行選擇付費 instance。本專案不會替使用者購買方案或輸入付款資料。
 
 ---
 

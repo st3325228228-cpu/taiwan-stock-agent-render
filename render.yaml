@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: taiwan-stock-agent
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT web:app
+    healthCheckPath: /healthz
+    envVars:
+      - key: USE_LLM
+        value: "false"
+      - key: STOCK_DATA_PROVIDER
+        value: yfinance
+      - key: STOCK_AGENT_DB
+        value: data/agent.db
+      - key: NEWS_LIMIT
+        value: "8"

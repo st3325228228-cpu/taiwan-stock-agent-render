@@ -36,11 +36,12 @@ flowchart TD
 - LLM 可選：CLI 可使用 `OPENAI_API_KEY` 環境變數；網頁介面則可在每次分析時輸入金鑰。沒有金鑰時自動使用本地模板，不會讓整個流程失效。
 - 報告會列出資料缺口、來源、風險與 `Important Notice`。
 - 僅做研究與分析；不連接券商、不讀取帳戶、不下單、不改單、不撤單。
+- `render.yaml` 已固定 Build Command、Start Command、Health Check 與基本環境變數。
 
 ## 安裝
 
 ```bash
-cd /home/ubuntu/taiwan-stock-agent
+cd /home/ubuntu/taiwan-stock-agent-render
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -92,6 +93,8 @@ Render 的 **Start Command** 必須使用平台提供的 `$PORT`：
 gunicorn --bind 0.0.0.0:$PORT web:app
 ```
 
+Repository 根目錄已包含 `render.yaml`，也可以在 Render 選擇 **New → Blueprint**，直接使用這份部署設定。預設使用 Free plan，避免未經確認產生費用；若要 24/7 不休眠，請在 Render Dashboard 將服務方案改成付費 instance。
+
 ### Flask API 使用方式
 
 健康檢查：
@@ -136,6 +139,18 @@ curl -v http://127.0.0.1:10000/healthz
 | `STOCK_AGENT_DB` | `data/agent.db` | SQLite 路徑 |
 | `NEWS_LIMIT` | `8` | 最多保留的新聞數 |
 
+## 永久網站的部署選擇
+
+「永久網站」可以分成固定網址與 24/7 常駐兩個層次：
+
+| 方案 | 網址 | 服務狀態 | 資料保存 | 成本／注意事項 |
+|---|---|---|---|---|
+| Render Free | 固定 `onrender.com` 網址 | 閒置後休眠，請求時喚醒 | 本機 SQLite 不保證永久保存 | 適合展示與測試，無需付費 |
+| Render 付費 Web Service | 固定 `onrender.com` 或自訂網域 | 可維持常駐 | 仍建議使用外部 PostgreSQL | 需在 Render 自行選擇付費方案；本專案不代為購買 |
+| 外部資料庫＋Render | 固定網址 | 依 Web Service 方案 | PostgreSQL 等外部資料庫可持久保存 | 適合正式使用，需另外設定資料庫與密鑰 |
+
+本次已完成可重現的 Render 部署設定，但不會替你啟用付費方案或輸入付款資料。若只需要網址長期存在，Free plan 已足夠；若要求全天候即時可用，請在 Render Dashboard 自行升級 Web Service。
+
 ## 測試
 
 ```bash
@@ -148,3 +163,4 @@ pytest
 - 日線技術分析使用完成的歷史 K 線；不把缺失值補成 0，也不把技術指標當成保證。
 - 新聞標題僅是事件線索，不能代替閱讀原文、公司公告或法說資料。
 - 這個專案不提供交易執行能力；若未來擴充監控或排程，也只能產生研究報告或通知，不能產生交易副作用。
+目前已整理成可由 Render 持續部署的 Flask Web Service；GitHub `main` 分支更新後可自動重新部署。
