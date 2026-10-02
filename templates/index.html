@@ -19,7 +19,10 @@
               <span class="brand-name">台股 AI 研究助手</span>
             </span>
           </a>
-          <span class="mode-pill"><span class="status-dot"></span>唯讀研究模式</span>
+          <div class="header-actions">
+            <a class="header-status" href="/healthz"><span class="status-dot"></span>API STATUS</a>
+            <span class="mode-pill">唯讀研究模式</span>
+          </div>
         </div>
         <div class="hero-copy">
           <div class="hero-copy-main">
@@ -96,7 +99,7 @@
 
             <button class="primary-button" id="submit-button" type="submit">
               <span class="button-label">開始分析</span>
-              <span class="button-loading" hidden>正在整理資料…</span>
+              <span class="button-loading" hidden><i class="button-spinner"></i>正在整理資料…</span>
               <span class="button-arrow" aria-hidden="true">→</span>
             </button>
           </form>
