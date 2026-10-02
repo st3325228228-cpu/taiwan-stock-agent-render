@@ -30,7 +30,25 @@ function inlineMarkdown(value) {
   text = text.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
   text = text.replace(/\*([^*]+)\*/g, "<em>$1</em>");
   text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  text = text.replaceAll("資料不足", '<span class="missing-data">資料不足</span>');
   return text;
+}
+
+function sectionClass(title) {
+  if (title.includes("基本面")) return "section-fundamentals";
+  if (title.includes("技術")) return "section-technical";
+  if (title.includes("股價")) return "section-price";
+  if (title.includes("新聞")) return "section-news";
+  if (title.includes("資料庫")) return "section-database";
+  if (title.includes("風險") || title.includes("Important")) return "section-notice";
+  return "section-summary";
+}
+
+function sectionKicker(title) {
+  if (title.includes("Tool")) return "EVIDENCE MODULE";
+  if (title.includes("結論")) return "EXECUTIVE SUMMARY";
+  if (title.includes("風險") || title.includes("Important")) return "RISK & NOTICE";
+  return "RESEARCH NOTE";
 }
 
 function renderMarkdown(markdown) {
@@ -38,11 +56,21 @@ function renderMarkdown(markdown) {
   const html = [];
   let listType = null;
   let inCode = false;
+  let sectionOpen = false;
+  let sectionCount = 0;
 
   const closeList = () => {
     if (listType) {
       html.push(`</${listType}>`);
       listType = null;
+    }
+  };
+
+  const closeSection = () => {
+    closeList();
+    if (sectionOpen) {
+      html.push("</div></details>");
+      sectionOpen = false;
     }
   };
 
@@ -66,9 +94,27 @@ function renderMarkdown(markdown) {
 
     const heading = line.match(/^(#{1,3})\s+(.+)$/);
     if (heading) {
-      closeList();
       const level = heading[1].length;
-      html.push(`<h${level}>${inlineMarkdown(heading[2])}</h${level}>`);
+      if (level === 2) {
+        closeSection();
+        sectionCount += 1;
+        const number = String(sectionCount).padStart(2, "0");
+        const title = heading[2];
+        html.push(`<details class="report-section ${sectionClass(title)}" open>`);
+        html.push(`<summary class="report-section-heading">
+          <span class="report-section-number">${number}</span>
+          <span class="report-section-copy">
+            <span class="report-section-kicker">${sectionKicker(title)}</span>
+            <span class="report-section-title">${inlineMarkdown(title)}</span>
+          </span>
+          <span class="report-chevron" aria-hidden="true">⌄</span>
+        </summary><div class="report-section-body">`);
+        sectionOpen = true;
+      } else {
+        closeList();
+        if (level === 1) closeSection();
+        html.push(`<h${level}>${inlineMarkdown(heading[2])}</h${level}>`);
+      }
       continue;
     }
 
@@ -117,7 +163,7 @@ function renderMarkdown(markdown) {
   }
 
   if (inCode) html.push("</code></pre>");
-  closeList();
+  closeSection();
   return html.join("");
 }
 
@@ -143,8 +189,9 @@ function showMeta(bundle, analysisId) {
 
   for (const [key, label] of Object.entries(labels)) {
     const chip = document.createElement("span");
-    chip.className = "meta-chip";
     const status = sections[key]?.status || "未提供";
+    const safeStatusClass = status.toLowerCase().replace(/[^a-z-]/g, "-");
+    chip.className = `meta-chip meta-${safeStatusClass}`;
     chip.textContent = `${label} · ${status}`;
     resultMeta.appendChild(chip);
   }

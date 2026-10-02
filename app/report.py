@@ -71,7 +71,18 @@ def fallback_report(bundle: AnalysisBundle) -> str:
         "",
         "## 基本面 Tool",
     ]
-    if fund_data:
+    fundamental_keys = {
+        "marketCap",
+        "trailingPE",
+        "priceToBook",
+        "returnOnEquity",
+        "revenue",
+        "netIncome",
+        "totalCash",
+        "totalDebt",
+        "freeCashflow",
+    }
+    if any(fund_data.get(key) is not None for key in fundamental_keys):
         for label, key in [
             ("公司名稱", "longName"),
             ("產業／類別", "industry"),
@@ -79,16 +90,35 @@ def fallback_report(bundle: AnalysisBundle) -> str:
             ("本益比（供應商欄位）", "trailingPE"),
             ("股價淨值比（供應商欄位）", "priceToBook"),
             ("股東權益報酬率（供應商欄位）", "returnOnEquity"),
-            ("營收成長率（供應商欄位）", "revenueGrowth"),
-            ("淨利率（供應商欄位）", "profitMargins"),
+            ("資產報酬率（計算／供應商欄位）", "returnOnAssets"),
+            ("營收", "revenue"),
+            ("營收成長率（計算／供應商欄位）", "revenueGrowth"),
+            ("營業利益率（計算／供應商欄位）", "operatingMargins"),
+            ("淨利率（計算／供應商欄位）", "profitMargins"),
+            ("淨利", "netIncome"),
+            ("現金及約當現金", "totalCash"),
+            ("總負債", "totalDebt"),
+            ("自由現金流", "freeCashflow"),
         ]:
             value = fund_data.get(key)
-            if key in {"returnOnEquity", "revenueGrowth", "profitMargins"} and value is not None:
+            if key in {
+                "returnOnEquity",
+                "returnOnAssets",
+                "revenueGrowth",
+                "operatingMargins",
+                "profitMargins",
+            } and value is not None:
                 value = f"{float(value) * 100:.2f}%"
-            lines.append(f"- {label}：{_fmt(value)}")
-        lines.append("- 備註：供應商摘要欄位屬單一來源，估值關鍵數字應再核對公司公告與正式財報。")
+            digits = 0 if key in {"marketCap", "revenue", "netIncome", "totalCash", "totalDebt", "freeCashflow"} else 2
+            lines.append(f"- {label}：{_fmt(value, digits)}")
+        if fund_data.get("financials_as_of"):
+            lines.append(f"- 財報資料年度：{fund_data['financials_as_of']}")
+        lines.append(f"- 資料來源：{fund_data.get('data_sources', 'Yahoo Finance')}")
+        lines.append("- 備註：估值關鍵數字仍應再核對公司公告與正式財報。")
     else:
         lines.append("- 資料不足：本次沒有取得可用的基本面欄位。")
+        if fund_data.get("retrieval_notes"):
+            lines.append(f"- 取得備註：{fund_data['retrieval_notes']}")
 
     lines.extend(["", "## 新聞搜尋 Tool"])
     if news_items:

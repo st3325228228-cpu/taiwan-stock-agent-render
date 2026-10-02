@@ -185,9 +185,15 @@ textarea { min-height: 126px; padding: 13px 15px; resize: vertical; font-size: 1
 .result-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
 .meta-chip { border: 1px solid #e4e8f2; border-radius: 999px; padding: 5px 9px; color: #65718e; background: #fafbfe; font-size: 11px; }
 .meta-chip strong { color: var(--ink); }
+.meta-ok { color: #218462; border-color: #cdeee2; background: #f0fbf7; }
+.meta-skipped { color: #7c879c; background: #f7f8fb; }
+.meta-partial { color: #a06a1d; border-color: #f2dfbd; background: #fff9ed; }
+.meta-failed { color: #b24d5b; border-color: #f2cbd1; background: #fff5f6; }
 .report-card { border: 1px solid #e5e9f2; border-radius: 14px; overflow: hidden; background: #fff; }
 .report-card-topline { display: flex; justify-content: space-between; gap: 12px; padding: 11px 16px; color: #8c98af; background: #f8f9fc; border-bottom: 1px solid #e8ebf3; font-size: 10px; font-weight: 800; letter-spacing: .12em; }
 .report-content { padding: 22px 22px 25px; color: #34405c; font-size: 14px; line-height: 1.82; overflow-wrap: anywhere; }
+.report-content a { color: var(--blue-dark); text-decoration: none; }
+.report-content a:hover { text-decoration: underline; }
 .report-content h1, .report-content h2, .report-content h3 { color: var(--ink); line-height: 1.35; letter-spacing: -.025em; }
 .report-content h1 { margin: 0 0 17px; font-size: 24px; }
 .report-content h2 { margin: 25px 0 9px; padding-bottom: 6px; border-bottom: 1px solid #ebedf4; font-size: 18px; }
@@ -200,6 +206,25 @@ textarea { min-height: 126px; padding: 13px 15px; resize: vertical; font-size: 1
 .report-content pre { overflow-x: auto; padding: 13px; border-radius: 9px; color: #e9edff; background: #17213b; }
 .report-content pre code { padding: 0; color: inherit; background: transparent; }
 .report-content hr { margin: 22px 0; border: 0; border-top: 1px solid #e5e9f1; }
+.report-section { margin: 13px 0; border: 1px solid #e6eaf3; border-radius: 15px; background: linear-gradient(145deg, #ffffff, #fbfcff); box-shadow: 0 5px 18px rgba(38, 55, 100, .045); }
+.report-section[open] { box-shadow: 0 9px 24px rgba(38, 55, 100, .07); }
+.report-section-heading { display: flex; align-items: center; gap: 12px; padding: 15px 16px; color: var(--ink); cursor: pointer; list-style: none; }
+.report-section-heading::-webkit-details-marker { display: none; }
+.report-section-number { display: grid; place-items: center; flex: 0 0 31px; width: 31px; height: 31px; border-radius: 10px; color: #6d83de; background: #eef2ff; font-size: 10px; font-weight: 850; letter-spacing: .04em; }
+.report-section-copy { display: grid; min-width: 0; gap: 2px; }
+.report-section-kicker { color: #9aa6c0; font-size: 9px; font-weight: 800; letter-spacing: .15em; }
+.report-section-title { color: var(--ink); font-size: 16px; font-weight: 760; line-height: 1.35; }
+.report-chevron { margin-left: auto; color: #8996b5; font-size: 19px; line-height: 1; transition: transform .2s; }
+.report-section[open] .report-chevron { transform: rotate(180deg); }
+.report-section-body { padding: 2px 19px 18px; border-top: 1px solid #edf0f6; }
+.report-section-body h3 { margin-top: 15px; }
+.section-price .report-section-number { color: #4268ce; background: #edf3ff; }
+.section-technical .report-section-number { color: #7e5bc0; background: #f3efff; }
+.section-fundamentals .report-section-number { color: #14876c; background: #ecfaf5; }
+.section-news .report-section-number { color: #a66b24; background: #fff7e8; }
+.section-notice { border-color: #e8e1fb; background: linear-gradient(145deg, #fff, #faf8ff); }
+.section-notice .report-section-number { color: #7b61c9; background: #f0edff; }
+.missing-data { display: inline-flex; align-items: center; padding: 1px 6px; border: 1px solid #f2dfbd; border-radius: 999px; color: #a06a1d; background: #fff9ed; font-size: .88em; line-height: 1.45; }
 .report-break { height: 4px; }
 .site-footer { display: flex; justify-content: space-between; gap: 15px; max-width: 1220px; margin: 0 auto; padding: 2px 24px 28px; color: #8b96ab; font-size: 11px; }
 .site-footer a { color: var(--blue-dark); text-decoration: none; }

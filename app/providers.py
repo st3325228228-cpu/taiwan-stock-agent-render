@@ -107,10 +107,79 @@ class YFinanceProvider:
             data_as_of=str(timestamp),
         )
 
+    @staticmethod
+    def _clean_value(value: Any) -> Any:
+        """Return None for provider NaN/NA values while preserving real values."""
+        if value is None:
+            return None
+        try:
+            if pd.isna(value):
+                return None
+        except (TypeError, ValueError):
+            pass
+        return value
+
+    @classmethod
+    def _mapping_value(cls, mapping: Any, key: str) -> Any:
+        """Read a value from yfinance dict-like and FastInfo objects safely."""
+        try:
+            getter = getattr(mapping, "get", None)
+            if getter is not None:
+                return cls._clean_value(getter(key))
+            return cls._clean_value(getattr(mapping, key, None))
+        except Exception:
+            return None
+
+    @classmethod
+    def _statement_value(
+        cls, frame: pd.DataFrame | None, keys: list[str], position: int = 0
+    ) -> Any:
+        """Read the newest or previous value from a yfinance statement frame."""
+        if frame is None or frame.empty:
+            return None
+        for key in keys:
+            if key not in frame.index:
+                continue
+            try:
+                values = frame.loc[key].dropna()
+                if len(values) > position:
+                    return cls._clean_value(values.iloc[position])
+            except (AttributeError, IndexError, KeyError, TypeError, ValueError):
+                continue
+        return None
+
+    @staticmethod
+    def _ratio(numerator: Any, denominator: Any) -> float | None:
+        """Calculate a ratio only when both financial statement values exist."""
+        try:
+            if numerator is None or denominator in (None, 0):
+                return None
+            return float(numerator) / float(denominator)
+        except (TypeError, ValueError, ZeroDivisionError):
+            return None
+
+    @staticmethod
+    def _first_value(*values: Any) -> Any:
+        for value in values:
+            if value is not None:
+                return value
+        return None
+
     def fetch_fundamentals(self, symbol: str) -> ToolResult:
         normalized = normalize_tw_symbol(symbol)
         ticker = self._ticker(normalized)
-        info = getattr(ticker, "info", {}) or {}
+        errors: list[str] = []
+        try:
+            info = getattr(ticker, "info", {}) or {}
+        except Exception as exc:
+            info = {}
+            errors.append(f"summary: {type(exc).__name__}")
+        try:
+            fast_info = getattr(ticker, "fast_info", {}) or {}
+        except Exception as exc:
+            fast_info = {}
+            errors.append(f"fast_info: {type(exc).__name__}")
+
         keys = [
             "symbol",
             "longName",
@@ -133,16 +202,168 @@ class YFinanceProvider:
             "dividendYield",
             "fullTimeEmployees",
         ]
-        data = {key: info.get(key) for key in keys if info.get(key) is not None}
+        data = {
+            key: self._mapping_value(info, key)
+            for key in keys
+            if self._mapping_value(info, key) is not None
+        }
         data["symbol"] = normalized
-        data["source_note"] = (
-            "Provider profile/summary fields; verify valuation-critical values against filings."
+        data["marketCap"] = self._first_value(
+            data.get("marketCap"), self._mapping_value(fast_info, "market_cap")
         )
+        data["currency"] = self._first_value(
+            data.get("currency"), self._mapping_value(fast_info, "currency"), "TWD"
+        )
+
+        financial_keys = (
+            "marketCap",
+            "trailingPE",
+            "priceToBook",
+            "returnOnEquity",
+            "profitMargins",
+            "totalCash",
+            "totalDebt",
+            "freeCashflow",
+            "revenue",
+            "netIncome",
+            "operatingIncome",
+            "totalAssets",
+            "totalEquity",
+        )
+        statement_dates: list[str] = []
+        if any(data.get(key) is None for key in financial_keys):
+            statements: dict[str, pd.DataFrame | None] = {}
+            for name, getter_name in (
+                ("income", "get_income_stmt"),
+                ("balance", "get_balance_sheet"),
+                ("cash", "get_cash_flow"),
+            ):
+                try:
+                    frame = getattr(ticker, getter_name)(freq="yearly")
+                    statements[name] = frame
+                    if frame is not None and not frame.empty:
+                        statement_dates.extend(str(column) for column in frame.columns[:1])
+                except Exception as exc:
+                    statements[name] = None
+                    errors.append(f"{name}: {type(exc).__name__}")
+
+            income = statements.get("income")
+            balance = statements.get("balance")
+            cash = statements.get("cash")
+            revenue = self._statement_value(
+                income, ["Total Revenue", "TotalRevenue", "Operating Revenue", "OperatingRevenue"]
+            )
+            previous_revenue = self._statement_value(
+                income,
+                ["Total Revenue", "TotalRevenue", "Operating Revenue", "OperatingRevenue"],
+                position=1,
+            )
+            net_income = self._statement_value(
+                income,
+                [
+                    "Net Income",
+                    "NetIncome",
+                    "Net Income Common Stockholders",
+                    "NetIncomeCommonStockholders",
+                ],
+            )
+            operating_income = self._statement_value(
+                income, ["Operating Income", "OperatingIncome"]
+            )
+            total_assets = self._statement_value(balance, ["Total Assets", "TotalAssets"])
+            total_equity = self._statement_value(
+                balance,
+                [
+                    "Stockholders Equity",
+                    "StockholdersEquity",
+                    "Common Stock Equity",
+                    "CommonStockEquity",
+                    "Total Equity Gross Minority Interest",
+                    "TotalEquityGrossMinorityInterest",
+                ],
+            )
+            total_cash = self._statement_value(
+                balance,
+                [
+                    "Cash Cash Equivalents And Short Term Investments",
+                    "CashCashEquivalentsAndShortTermInvestments",
+                    "Cash And Cash Equivalents",
+                    "CashAndCashEquivalents",
+                ],
+            )
+            total_debt = self._statement_value(
+                balance,
+                [
+                    "Total Debt",
+                    "TotalDebt",
+                    "Long Term Debt And Capital Lease Obligation",
+                    "LongTermDebtAndCapitalLeaseObligation",
+                ],
+            )
+            free_cashflow = self._statement_value(cash, ["Free Cash Flow", "FreeCashFlow"])
+
+            derived = {
+                "revenue": revenue,
+                "netIncome": net_income,
+                "operatingIncome": operating_income,
+                "totalAssets": total_assets,
+                "totalEquity": total_equity,
+                "totalCash": total_cash,
+                "totalDebt": total_debt,
+                "freeCashflow": free_cashflow,
+                "revenueGrowth": self._ratio(
+                    revenue - previous_revenue
+                    if revenue is not None and previous_revenue is not None
+                    else None,
+                    previous_revenue,
+                ),
+                "returnOnEquity": self._ratio(net_income, total_equity),
+                "returnOnAssets": self._ratio(net_income, total_assets),
+                "profitMargins": self._ratio(net_income, revenue),
+                "operatingMargins": self._ratio(operating_income, revenue),
+            }
+            for key, value in derived.items():
+                if data.get(key) is None and value is not None:
+                    data[key] = value
+
+            if data.get("marketCap") is not None and data.get("netIncome") is not None:
+                data.setdefault("trailingPE", self._ratio(data["marketCap"], data["netIncome"]))
+            if data.get("marketCap") is not None and data.get("totalEquity") is not None:
+                data.setdefault("priceToBook", self._ratio(data["marketCap"], data["totalEquity"]))
+
+        if statement_dates:
+            data["financials_as_of"] = statement_dates[0]
+        data["data_sources"] = "Yahoo Finance summary/profile; financial statements fallback when available"
+        data["source_note"] = (
+            "Summary fields are supplemented by annual income statement, balance sheet, and cash-flow data when available; verify valuation-critical values against filings."
+        )
+        if errors:
+            data["retrieval_notes"] = "；".join(errors)
+        usable_fields = [
+            key
+            for key in (
+                "longName",
+                "industry",
+                "marketCap",
+                "trailingPE",
+                "priceToBook",
+                "returnOnEquity",
+                "returnOnAssets",
+                "revenue",
+                "netIncome",
+                "totalEquity",
+                "totalCash",
+                "totalDebt",
+                "freeCashflow",
+            )
+            if data.get(key) is not None
+        ]
         return ToolResult(
             tool="fundamentals",
+            status="ok" if usable_fields else "partial",
             data=json_safe(data),
             source=self.name,
-            data_as_of=now_utc_iso(),
+            data_as_of=data.get("financials_as_of", now_utc_iso()),
         )
 
     def fetch_news(self, symbol: str, limit: int = 8) -> ToolResult:
