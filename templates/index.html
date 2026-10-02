@@ -22,9 +22,35 @@
           <span class="mode-pill"><span class="status-dot"></span>唯讀研究模式</span>
         </div>
         <div class="hero-copy">
-          <p class="eyebrow">EVIDENCE FIRST · TRADITIONAL CHINESE</p>
-          <h1>把市場資料，整理成<br><em>看得懂的研究報告。</em></h1>
-          <p>輸入股票代號與你的問題，取得包含價格、技術面、基本面與新聞線索的結構化分析。</p>
+          <div class="hero-copy-main">
+            <p class="eyebrow">EVIDENCE FIRST · TRADITIONAL CHINESE</p>
+            <h1>把市場資料，整理成<br><em>看得懂的研究報告。</em></h1>
+            <p>輸入股票代號與你的問題，取得包含價格、技術面、基本面與新聞線索的結構化分析。</p>
+            <div class="hero-rail" aria-label="服務特色">
+              <span><i class="rail-dot rail-dot-blue"></i>公開市場資料</span>
+              <span><i class="rail-dot rail-dot-purple"></i>結構化證據</span>
+              <span><i class="rail-dot rail-dot-green"></i>唯讀研究</span>
+            </div>
+          </div>
+          <div class="hero-signal-card" aria-label="研究引擎摘要">
+            <div class="signal-head">
+              <span>RESEARCH ENGINE</span>
+              <span class="signal-live"><i></i>LIVE</span>
+            </div>
+            <div class="signal-chart" aria-hidden="true">
+              <svg viewBox="0 0 320 112" preserveAspectRatio="none">
+                <path class="signal-grid-line" d="M0 88H320M0 56H320M0 24H320"></path>
+                <path class="signal-area" d="M0 88 L32 78 L62 82 L94 51 L123 66 L156 39 L187 47 L218 22 L249 36 L280 14 L320 28 L320 112 L0 112Z"></path>
+                <path class="signal-line" d="M0 88 L32 78 L62 82 L94 51 L123 66 L156 39 L187 47 L218 22 L249 36 L280 14 L320 28"></path>
+                <circle class="signal-point" cx="280" cy="14" r="5"></circle>
+              </svg>
+            </div>
+            <div class="signal-stats">
+              <div><strong>4</strong><span>資料模組</span></div>
+              <div><strong>∞</strong><span>研究問題</span></div>
+              <div><strong>0</strong><span>交易副作用</span></div>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -34,6 +60,7 @@
             <div>
               <p class="section-kicker">START A REVIEW</p>
               <h2>你想研究哪一檔？</h2>
+              <p class="panel-subtitle">先選代號，再用自然語言描述你想知道的事。</p>
             </div>
             <span class="step-badge">01</span>
           </div>
@@ -53,9 +80,18 @@
             <label for="question">研究問題 <span>可自訂</span></label>
             <textarea id="question" name="question" rows="5">請綜合分析這檔股票的價格、技術面、基本面與近期新聞。</textarea>
             <p class="field-hint">例如：只看股價、請分析技術面，或比較近期新聞與基本面風險。</p>
+            <div class="question-presets" aria-label="快速研究問題">
+              <span>快速提問</span>
+              <button type="button" class="prompt-chip" data-question="只看股價">只看股價</button>
+              <button type="button" class="prompt-chip" data-question="請分析技術面與近期趨勢">技術面與趨勢</button>
+              <button type="button" class="prompt-chip" data-question="請整理基本面與近期新聞風險">基本面與新聞</button>
+            </div>
 
             <label for="openai-api-key">OpenAI API Key <span>本次使用，可留空</span></label>
-            <input id="openai-api-key" name="openai_api_key" type="password" placeholder="sk-…" autocomplete="off" autocapitalize="off" spellcheck="false">
+            <div class="secret-input">
+              <input id="openai-api-key" name="openai_api_key" type="password" placeholder="sk-…" autocomplete="new-password" autocapitalize="off" spellcheck="false">
+              <button type="button" class="secret-toggle" id="toggle-api-key" aria-label="顯示 API Key" aria-pressed="false">顯示</button>
+            </div>
             <p class="field-hint">只隨本次 HTTPS 請求傳送，完成後會清除，不會寫入本專案資料庫。</p>
 
             <button class="primary-button" id="submit-button" type="submit">
@@ -90,6 +126,12 @@
             </div>
             <h3>準備好開始了嗎？</h3>
             <p>填入左側的股票代號與問題，這裡會顯示整理好的繁體中文報告。</p>
+            <div class="empty-feature-grid">
+              <span><i>01</i>價格</span>
+              <span><i>02</i>技術面</span>
+              <span><i>03</i>基本面</span>
+              <span><i>04</i>新聞</span>
+            </div>
           </div>
 
           <div class="error-box" id="error-box" role="alert" hidden></div>

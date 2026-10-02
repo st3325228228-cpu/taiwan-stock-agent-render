@@ -2,6 +2,7 @@ const form = document.getElementById("analysis-form");
 const symbolInput = document.getElementById("symbol");
 const questionInput = document.getElementById("question");
 const apiKeyInput = document.getElementById("openai-api-key");
+const apiKeyToggle = document.getElementById("toggle-api-key");
 const submitButton = document.getElementById("submit-button");
 const buttonLabel = document.querySelector(".button-label");
 const buttonLoading = document.querySelector(".button-loading");
@@ -205,4 +206,19 @@ document.querySelectorAll("[data-symbol]").forEach((button) => {
     symbolInput.value = button.dataset.symbol;
     symbolInput.focus();
   });
+});
+
+document.querySelectorAll("[data-question]").forEach((button) => {
+  button.addEventListener("click", () => {
+    questionInput.value = button.dataset.question;
+    questionInput.focus();
+  });
+});
+
+apiKeyToggle.addEventListener("click", () => {
+  const shouldShow = apiKeyInput.type === "password";
+  apiKeyInput.type = shouldShow ? "text" : "password";
+  apiKeyToggle.textContent = shouldShow ? "隱藏" : "顯示";
+  apiKeyToggle.setAttribute("aria-label", shouldShow ? "隱藏 API Key" : "顯示 API Key");
+  apiKeyToggle.setAttribute("aria-pressed", String(shouldShow));
 });
