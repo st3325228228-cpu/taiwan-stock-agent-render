@@ -41,7 +41,7 @@ flowchart TD
 ## 安裝
 
 ```bash
-cd /home/ubuntu/taiwan-stock-agent-render
+cd taiwan-stock-agent-render
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
